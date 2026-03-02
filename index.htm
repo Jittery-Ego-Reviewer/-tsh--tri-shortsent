@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>「叉音」發音練習</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'ZCOOL+KuaiLe', 'Microsoft JhengHei', sans-serif;
+            background: linear-gradient(135deg, #fceabb 0%, #f8b500 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .slot-column {
+            background: #fff;
+            border: 4px solid #333;
+            border-radius: 15px;
+            height: 120px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .slot-list {
+            position: absolute;
+            width: 100%;
+            transition: transform 3s cubic-bezier(0.15, 0, 0.15, 1);
+            text-align: center;
+        }
+
+        .slot-item {
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #d946ef;
+            padding: 10px;
+            word-break: break-all;
+        }
+
+        .lever-container {
+            width: 60px;
+            height: 200px;
+            position: relative;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .lever-base {
+            width: 20px;
+            height: 150px;
+            background: #666;
+            margin: 0 auto;
+            border-radius: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .lever-arm {
+            width: 12px;
+            height: 100px;
+            background: #999;
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 6px;
+            transform-origin: bottom center;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .lever-knob {
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle at 30% 30%, #ff4b2b, #ff416c);
+            border-radius: 50%;
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .lever-pulled .lever-arm {
+            transform: translateX(-50%) rotateX(160deg);
+        }
+
+        .instruction-box {
+            background: rgba(255, 255, 255, 0.9);
+            border: 4px dashed #ff416c;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+
+    <div class="max-w-4xl w-full bg-white rounded-3xl shadow-2xl p-6 md:p-10 border-8 border-yellow-400 relative">
+        <h1 class="text-4xl md:text-5xl text-center mb-8 text-pink-600 font-black tracking-widest">
+            ✨ 叉音 /tsh-/ 練習 ✨
+        </h1>
+
+        <div class="flex flex-col md:flex-row items-center gap-6 mb-10">
+            <!-- Slots Area -->
+            <div class="flex-grow grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+                <div class="flex flex-col">
+                    <span class="text-center font-bold text-gray-700 mb-2">人物</span>
+                    <div class="slot-column" id="slot-0">
+                        <div class="slot-list" id="list-0"></div>
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-center font-bold text-gray-700 mb-2">動作</span>
+                    <div class="slot-column" id="slot-1">
+                        <div class="slot-list" id="list-1"></div>
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-center font-bold text-gray-700 mb-2">事物</span>
+                    <div class="slot-column" id="slot-2">
+                        <div class="slot-list" id="list-2"></div>
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-center font-bold text-gray-700 mb-2">地方</span>
+                    <div class="slot-column" id="slot-3">
+                        <div class="slot-list" id="list-3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lever -->
+            <div class="lever-container" id="lever">
+                <div class="lever-base">
+                    <div class="lever-arm">
+                        <div class="lever-knob"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="instruction-box rounded-2xl p-6 text-center mb-6">
+            <p id="status-text" class="text-2xl md:text-3xl text-gray-800 font-bold">
+                拉動手把開始練習！
+            </p>
+        </div>
+
+        <div class="text-center">
+            <p class="text-sm text-gray-500 italic">貼士：嘗試把這四個詞連成句子，練習「tsh-」音！</p>
+        </div>
+    </div>
+
+    <script>
+        const words = {
+            person: ['陳大文', '陳小文', '陳先生', '陳伯伯', '陳同學', '我'],
+            action: ['踩', '猜', '炒', '拆', '抽', '刷', '穿', '尋', '擦', '畫', '偷', '攞', '抹', '吹'],
+            thing: ['茶杯', '茶葉', '茶壺', '菜心', '出口', '車輛', '廁紙', '擦膠', '牆壁', '刺蝟', '塵埃', '超人', '彩虹', '床單', '小草', '電車', '生菜', '白菜', '蔬菜', '刀叉', '牙齒', '洋葱', '昆蟲', '毛蟲'],
+            place: ['草地', '草原', '廁所', '操場', '村莊', '泳池', '前面']
+        };
+
+        const lists = [words.person, words.action, words.thing, words.place];
+        const slotListsElements = [
+            document.getElementById('list-0'),
+            document.getElementById('list-1'),
+            document.getElementById('list-2'),
+            document.getElementById('list-3')
+        ];
+
+        let isSpinning = false;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+
+            if (type === 'pull') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(40, now + 0.1);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else if (type === 'win') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.3);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            }
+        }
+
+        function initSlots() {
+            slotListsElements.forEach((el, index) => {
+                const items = lists[index];
+                const repeatedItems = [...items, ...items, ...items, ...items, ...items];
+                el.innerHTML = repeatedItems.map(item => `<div class="slot-item">${item}</div>`).join('');
+                el.style.transform = 'translateY(0px)';
+            });
+        }
+
+        async function spin() {
+            if (isSpinning) return;
+            initAudio();
+            
+            isSpinning = true;
+            const lever = document.getElementById('lever');
+            const statusText = document.getElementById('status-text');
+
+            lever.classList.add('lever-pulled');
+            playSound('pull');
+            
+            setTimeout(() => lever.classList.remove('lever-pulled'), 300);
+
+            statusText.innerText = "正在轉動中...";
+            
+            const spinPromises = slotListsElements.map((el, i) => {
+                return new Promise(resolve => {
+                    const itemCount = lists[i].length;
+                    const randomIndex = Math.floor(Math.random() * itemCount);
+                    const targetOffset = -((itemCount * 3 + randomIndex) * 120);
+                    
+                    setTimeout(() => {
+                        el.style.transform = `translateY(${targetOffset}px)`;
+                        setTimeout(resolve, 3000);
+                    }, i * 150);
+                });
+            });
+
+            await Promise.all(spinPromises);
+
+            playSound('win');
+            statusText.innerText = "轉好了！請開始練習。";
+            
+            setTimeout(() => {
+                isSpinning = false;
+            }, 500);
+        }
+
+        document.getElementById('lever').addEventListener('click', spin);
+        window.onload = initSlots;
+    </script>
+</body>
+</html>
